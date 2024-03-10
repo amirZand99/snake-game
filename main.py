@@ -1,5 +1,6 @@
 import pygame
 import time
+import random
 
 pygame.init()
 dis_width = 800
@@ -15,15 +16,6 @@ paused = False
 x1 = 400
 y1 = 450
 
-snake_block = 10
-
-font_style = pygame.font.SysFont(None, 90)
-
-
-def message(msg, color):
-    msg = font_style.render(msg, True, color)
-    screen.blit(msg, [dis_width / 2 - 100 , dis_height / 2])
-
 
 x1_change = 0
 y1_change = 0
@@ -32,51 +24,123 @@ clock = pygame.time.Clock()
 
 blue = (0, 0, 255)
 red = (255, 0, 0)
+gold = (253, 240, 13)
+green = (31, 153, 12)
 
-while not game_over:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            game_over = True
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                game_over = True
-            elif event.key == pygame.K_SPACE:
-                paused = not paused  # Toggle pause with Space key
-                if paused:
-                    x1_change = 0
+snake_block = 15
+
+font_style = pygame.font.SysFont(None, 35)
+
+def our_snake(snake_block, snake_list):
+    for i, x in enumerate(snake_list):
+        if i == 0:  # Draw the head with a different color
+            pygame.draw.rect(screen, green, [x[0], x[1], snake_block, snake_block])
+        else:  # Draw the body segments with the regular color
+            pygame.draw.rect(screen, blue, [x[0], x[1], snake_block, snake_block])
+
+
+def message(msg, color):
+    msg = font_style.render(msg, True, color)
+    screen.blit(msg, [dis_width / 2 - 100 , dis_height / 2])
+
+def gameLoop():  # creating a function
+    global paused
+    game_over = False
+    game_close = False
+
+    x1 = dis_width / 2
+    y1 = dis_height / 2
+
+    x1_change = 0
+    y1_change = 0
+
+    snake_List = []
+    Length_of_snake = 1
+
+    foodx = round(random.randrange(0, dis_width - snake_block) / 20.0) * 10.0
+    foody = round(random.randrange(0, dis_height - snake_block) / 20.0) * 10.0
+
+    while not game_over:
+
+        while game_close == True:
+            screen.blit(image, (0, 0))
+            message("You Lost! Press esc", red)
+            pygame.display.update()
+
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        game_over = False
+                        game_close = False
+                    if event.key == pygame.K_ESCAPE:
+                        gameLoop()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    quit()
+                elif event.key == pygame.K_SPACE:
+                    paused = not paused  # Toggle pause with Space key
+                    if paused:
+                        x1_change = 0
+                        y1_change = 0
+
+                elif event.key == pygame.K_LEFT and not paused:
+                    x1_change = -snake_block
                     y1_change = 0
+                elif event.key == pygame.K_RIGHT and not paused:
+                    x1_change = snake_block
+                    y1_change = 0
+                elif event.key == pygame.K_UP and not paused:
+                    y1_change = -snake_block
+                    x1_change = 0
+                elif event.key == pygame.K_DOWN and not paused:
+                    y1_change = snake_block
+                    x1_change = 0
 
-            elif event.key == pygame.K_LEFT and not paused:
-                x1_change = -snake_block
-                y1_change = 0
-            elif event.key == pygame.K_RIGHT and not paused:
-                x1_change = snake_block
-                y1_change = 0
-            elif event.key == pygame.K_UP and not paused:
-                y1_change = -snake_block
-                x1_change = 0
-            elif event.key == pygame.K_DOWN and not paused:
-                y1_change = snake_block
-                x1_change = 0
+        # screen.blit(image, (0, 0))
+        # x1 += x1_change
+        # y1 += y1_change
 
-    screen.blit(image, (0, 0))
-    x1 += x1_change
-    y1 += y1_change
+        # Check if snake hits the boundaries
+        if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < 0:
+            game_close = True
+        x1 += x1_change
+        y1 += y1_change
+        screen.blit(image, (0, 0))
+        pygame.draw.rect(screen, gold, [foodx, foody, snake_block, snake_block])
+        snake_Head = []
+        snake_Head.append(x1)
+        snake_Head.append(y1)
+        snake_List.append(snake_Head)
+        if len(snake_List) > Length_of_snake:
+            del snake_List[0]
 
-    # Check if snake hits the boundaries
-    if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < 0:
-        game_over = True
+        for x in snake_List[:-1]:
+            if x == snake_Head:
+                game_close = True
 
-    pygame.draw.rect(screen, blue, [x1, y1, snake_block, snake_block])
-    pygame.display.update()
+        our_snake(snake_block, snake_List)
+        pygame.display.update()
 
-    clock.tick(25)
+        if (foodx <= x1 <= foodx + snake_block or x1 <= foodx <= x1 + snake_block) and \
+                (foody <= y1 <= foody + snake_block or y1 <= foody <= y1 + snake_block):
+            foodx = round(random.randrange(0, dis_width - snake_block) / 20.0) * 10.0
+            foody = round(random.randrange(0, dis_height - snake_block) / 20.0) * 10.0
+            Length_of_snake += 1
 
-if game_over:
-    screen.blit(image, (0, 0))
-    message("You lost", red)
-    pygame.display.update()
-    time.sleep(2)
+        clock.tick(15)
 
-pygame.quit()
-quit()
+    if game_over:
+        screen.blit(image, (0, 0))
+        message("You lost", red)
+        pygame.display.update()
+        time.sleep(2)
+
+    pygame.quit()
+    quit()
+gameLoop()
