@@ -26,10 +26,18 @@ blue = (0, 0, 255)
 red = (255, 0, 0)
 gold = (253, 240, 13)
 green = (31, 153, 12)
+black = (0, 0, 0)
 
 snake_block = 15
 
 font_style = pygame.font.SysFont(None, 35)
+score_font = pygame.font.SysFont(None, 45)
+
+
+def Your_score(score):
+    value = score_font.render("Your Score: " + str(score), True, black)
+    screen.blit(value, [0, 0])
+
 
 def our_snake(snake_block, snake_list):
     for i, x in enumerate(snake_list):
@@ -125,6 +133,7 @@ def gameLoop():  # creating a function
                 game_close = True
 
         our_snake(snake_block, snake_List)
+        Your_score(Length_of_snake - 1)
         pygame.display.update()
 
         if (foodx <= x1 <= foodx + snake_block or x1 <= foodx <= x1 + snake_block) and \
