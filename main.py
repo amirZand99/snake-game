@@ -8,7 +8,7 @@ dis_height = 900
 
 screen = pygame.display.set_mode((dis_width, dis_height))
 image = pygame.image.load('/home/amir/Downloads/_400b86d6-92a7-40f4-b294-470887be9914.jpeg')
-pygame.display.set_caption('Snake game by amir')
+pygame.display.set_caption('Snake game by amirZand99')
 
 game_over = False
 paused = False
